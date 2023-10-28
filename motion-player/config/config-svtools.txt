@@ -1,0 +1,254 @@
+# Configuration file for
+# - panel display
+# - edition mode
+# - vocal fry detection parameters (should be in a separate file)
+
+# ---- Directory settings:
+
+# directory for saving and loading parameters
+# if paramdir is not defined, or the defined paramdir doesn't exist,
+# output files are saved in the same directory of the input wave file.
+[paramdir]
+c:/svtools/param/
+
+[tempdir]
+c:/svtools/temp/
+
+#[initvideodir]
+j:\mmdd3
+d:/database/mmdd3
+
+[wavoutdir]
+d:/svtools/wav
+
+#[intilabdir]
+j:\mmdd3\label
+
+# 2022.12.06
+# wav file name format for output mini wav files from list
+# 0 = filebase-ti-tf.wav
+# 1 = YYYYMMDD-HHMMSS-MSC-cXX.wav (start time)
+# 2 = filebase-ti-tf-text.wav
+# 3 = listfilebase-cnt.wav (cnt = segment number)
+[wavoutformat]
+3
+
+[video player delay]
+0
+100
+
+# ---- Spectrogram panel parameter settings:
+
+# spectral resolution: 1024
+[NFFTSpec]
+1024
+512
+# frame length: 32 ms -> 512 
+[NFrameSpec]
+512
+# frame shift: 2.5 ms -> 40;  5 ms -> 80; 10 ms -> 160
+[NFrameShiftSpec]
+160
+
+# ---- Panel configurations:
+
+# pitch panel
+[panel pitch]
+1
+# power panel
+[panel power]
+1
+# autocorrelation panel
+[panel autocorr]
+0
+# mel-cepstral spectrogram panel
+[panel mcepspec]
+0
+# spec panel
+[panel spec]
+1
+# masked spec panel
+[panel masked spec]
+0
+1
+0
+# frame panels
+[panel frame]
+1
+0
+# lastsyll panel
+[panel lastsyll]
+0
+# formant panel
+[panel formant]
+0
+1
+0
+# skeleton panel past frames 2017.10.04
+[panel skeleton frames]
+0
+15
+20
+
+# load label list
+[label list]
+0
+# multi label mode
+[multi label mode]
+0
+1
+0
+
+
+# number of points for edit panel height (100 - 2000)
+# default = 200
+[edit height]
+400
+200
+500
+200
+250
+150
+
+# number of points for edit text/label line height (10 - 100)
+# default = 25
+[text height]
+25
+32
+25
+25
+20
+
+# 0 -> single line for edit panel
+# 1 -> multiple lines for edit panel
+# N -> maximum N lines for edit panel
+[edit multiple lines]
+0
+1
+2
+
+# number of points for edit label line width (10 -200)
+# default = 50
+[label width]
+100
+80
+
+# number of points for spectrogram height (100 - 2000)
+# default = 200
+[spec height]
+128
+256
+128
+240
+128
+100
+
+# panel time interval [seconds]
+# -1 -> whole signal
+# 0 -> 20 seconds (default)
+[panel time interval]
+-1
+
+# ---- Parameter configurations:
+
+# load parameters
+[load parameters]
+1
+
+# calculate sub-bands when loading parameters (necessary for fry detection)
+# 0 -> save time when loading parameters
+[calc sub-bands]
+0
+
+# parameter save format
+# 0 -> binary
+# 1 -> asc
+[parameter format]
+0
+1
+0
+
+[text input mode]
+0
+1
+
+# --- Automatic function settings
+
+# auto hiragana (automatically input hiragana in the second text column, when Japanese is typed in the first text column)
+[auto hiragana]
+0
+
+# auto play (automatically play segment, when the cursor is up/down or when the selection bar is moved)
+[auto play]
+1
+
+# --- Player settings
+
+# 1 mono
+# 2 stereo
+# 3 three
+[play channel mode]
+1
+2
+3
+1
+
+# audio player device number
+# default = -1 (windows default device)
+[audio player device]
+-1
+2
+1
+-1
+
+# 2022.11.04 delay (duration of zero packets in ms) to deal with bluetooth audio player latencies
+[audio player delay]
+0
+300
+200
+
+# 2022.10.21
+# margin duration to be added before the segment (in seconds)
+[margin duration left]
+0
+5
+
+# 2022.10.21
+# margin duration to be added after the segment (in seconds)
+[margin duration right]
+0
+3
+
+#[margin duration]
+#5
+
+# pause duration (ms)
+[pause duration]
+0.2
+0
+
+
+# --- Initial view mode setting
+
+# 0 -> normal mode
+# 1 -> teleoperation view mode 
+[teleop mode]
+0
+1
+0
+
+# 0 -> upper and bottom views
+# 1 -> each freq bin (azimuth for different elevations)
+[soundloc view]
+0
+
+# --- Automatic start mode setting
+
+# 0 -> manual start mode
+# 1 -> online recsound 
+# 2 -> online sound localization mode
+# 3 -> online audio tracker mode
+[auto start mode]
+0
+3
+0

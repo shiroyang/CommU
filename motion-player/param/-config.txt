@@ -1,0 +1,12 @@
+# power threshold [dB] (sonorant frequency band)
+[power threshold]
+30.00
+# power threshold [dB] (whole frequency band)
+[power af threshold]
+30.00
+# power threshold [dB] (high frequency band)
+[power hf threshold]
+30.00
+# F0 estimation method: [0] LPC residual ACF; [1] F1 band ACF; [3] F3 band ACF; [6] SACF.
+[f0 estimation]
+0

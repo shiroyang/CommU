@@ -1,0 +1,298 @@
+# Configuration file for lip motion generation parameters
+
+# center F0
+[center F0]
+260
+120 shatani
+300 tts maki
+260 taniguchi
+100
+260
+120
+260
+100
+
+# center vowel (schwa) F1
+# 480 Hz for male
+# 540 Hz for female
+# 580 Hz for Nakagawa-san
+# default = 480 Hz
+[center F1]
+580
+560
+580
+480 shatani
+560 tts maki
+580 taniguchi
+600
+470
+
+# power threshold (in dB) for formant extraction 
+# should be adjusted according to mic gain and level
+# -10000  ->  adaptive power threshold (using first intervals), 
+#         but preferable to adjust fixed values for fixed environments
+#[power threshold]
+#10
+#-10000
+# moved to config-sigproc.txt
+
+
+# ---- parameters for sending commands to remote android/telenoid
+
+# jaw actuator number
+# -1 or not defined -> use default values
+# default = 6, for android
+# default = 4, for telenoid
+# 13 for ERICA
+# 32 for Nikola
+# 13 for CommU
+[jaw actuator]
+32
+13
+32
+13
+4
+-1
+
+# lip corner actuator number
+# -1 or not defined -> don't send lip corner command 
+# 7 for geminoidF
+# 9 for ERICA
+# 15,16 for HI4
+# 20,24 for Nikola
+[lip corner actuator]
+20,24
+-1
+20,24
+18,22
+9
+-1
+
+# -1 or not defined -> do not send lip protrusion command
+# 6 for HI4
+# 11 for ERICA
+# 26,27 for Nikola
+[lip protrusion actuator]
+26,27
+-1
+11
+10
+
+# 12 for ERICA
+# 31 for Nikola
+[tongue actuator]
+31
+-1
+12
+
+
+# 18 for ERICA
+[torso actuator]
+-1
+18
+
+
+# 6 for ERICA
+# 8,12 for Nikola outer eyebrow
+[eyebrow actuator]
+8,12
+-1
+6
+
+# maximum lip height (scale)
+# 255 is the maximum value 
+# -1 or not defined -> use default values
+# default = 255, for android
+# default = 200, for telenoid (to avoid silicon tearing)
+[max lip height]
+200
+255
+220
+255
+-1
+
+# default = -1 
+# 6 for telenoid
+# 15 for ERICA
+# 34 for Nikola
+# 6 for CommU
+[head pitch actuator]
+34
+6
+
+# 16 for ERICA
+# 8 for CommU
+# 35 for Nikola
+[head yaw actuator]
+35
+8
+
+# 14 for ERICA
+# 7 for CommU
+# 33 for Nikola
+[head roll actuator]
+33
+7
+
+
+
+# 1 -> generate head pitch motion based on F0 
+[F0 headpitch]
+1
+0
+
+# scaling factor for moving head pitch based on F0
+# default = 4
+[F0 headpitch scaling factor]
+5
+2
+4
+
+
+# smile (lip/corner + cheek) actuator number
+# 8 for ERICA
+# 7 for TOTTO
+# 16,17 lip corner up 18,22 ekubo  6,7 lower eyelids 9,13 eyecorner down, for Nikola
+[smile actuator]
+16,17
+-1
+
+
+# laugh lenght in ms
+[laugh length]
+1500
+2000
+800
+
+# idle smile value (0 ~ 255)
+[idle smile degree]
+0
+128
+40
+-1
+
+# idle head pitch value (0 ~ 255)
+# 128 for ERICA
+# 90 for TOTTO?
+# 128 for CommU
+[idle head pitch]
+128
+140
+90
+70
+-1
+
+# idle torso pitch value (0 ~ 255)
+# 140 for ERICA
+# 90 for TOTTO?
+[idle torso pitch]
+128
+140
+230
+
+# actuator number range for hand/arm actuators
+# 21 - 44 for ERICA
+# 19 - 32 for TOTTO
+[arm actuator min]
+-1
+21
+-1
+[arm actuator max]
+-1
+44
+-1
+
+# 1 for ERICA
+# 1,2 for Nikola
+# 12 for CommU
+[eyelid upper actuator]
+1,2
+12
+
+# 5 for ERICA
+# 6,7 for Nikola (smile)
+[eyelid lower actuator]
+6,7
+-1
+
+# 2,3 for ERICA
+# 3,4 for Nikola
+# 10,11 for CommU
+[eyeball yaw actuator]
+3,4
+10,11
+
+# 4 for ERICA
+# 5 for Nikola
+# 9 for CommU
+[eyeball pitch actuator]
+5
+9
+
+[eye corner down actuator]
+9,13
+
+[inner eyebrow raiser actuator]
+10,14
+
+[inner eyebrow frown actuator]
+11,15
+
+[lip corner raiser actuator]
+18.22
+
+[lip corner down actuator]
+19,23
+
+[lip corner back actuator]
+21,25
+
+[upper lip raiser actuator]
+28
+
+[lower lip down actuator]
+29
+
+[nose raiser actuator]
+30
+
+
+# idle blink interval: default 5000 ms
+[blink interval]
+4000
+
+# gaze blink duration: default 160 ms
+[gaze blink dur]
+300
+160
+
+# idle blink duration: default 200 ms
+[idle blink dur]
+200
+
+# range for averaging blinking rate estimation: default 20.0 seconds
+[blink avg range]
+20.0
+
+# priority level for sending actuator commands to robot
+# -1 or not defined -> use default values
+# default = 5
+[priority]
+50
+-1
+
+# time interval to keep the motion
+# -1 or not defined -> use default values
+# default = 50 ms, for android
+# default = 100 ms, for telenoid
+[keep time]
+50
+-1
+
+# interval (in ms) to send commands to remote android/telenoid
+# should be as smaller as possible (10 ~ 30 ms)
+# default = 10 ms
+[sampling interval]
+20
+40
+20

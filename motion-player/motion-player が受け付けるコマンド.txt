@@ -1,0 +1,50 @@
+motion-player が受け付けるコマンド
+
+/move <actuator> <pose> <velocity>
+
+/movemulti <actuator> <pose> <velocity> <actuator> <pose> <velocity> 
+
+/movemulti5 <actuator> <pose> <velocity> <priority> <keeptime> <actuator> <pose> <velocity> <priority> <keeptime>
+
+/lookaway <eyedir> <priority> <keeptime> <w_head>
+
+/look <x> <y> <z> <w_eye> <w_head> <w_body> <priority> <keeptime> 
+
+
+actuator [0 ~ 13, for CommU]
+pose [depends on actuator]
+velocity [depends on actuator]　
+
+eyedir {f, l, r, u, d, lu, ld, ru, rd}
+x,y,z [mm] (x: front, y: left, z: up; assumes CommU's coordinate is {0, 100, 900})
+w_eye, w_head, w_body [0.0 ~ 1.0]
+
+priority [1 ~ ] 高い数値の方が優先度が高い；例えば、瞬きなどのアイドルモーションは 1、ランダムな目逸らしの動作には2、特定の人に視線を向けるには3などのように使い分けています。
+keeptime [ms] priority の高い指令を維持する時間
+
+/blinkmotion on 
+/blinkmotion off 
+(or GUI)
+
+
+注意：
+eye, head, torso は /move, /movemulti, /movemulti5 で/look とバッティングしているバグがあるので、直します。
+腕は　/movemulti5 で動くので、バグが直るまで、腕以外の動きは、/look と　/lookaway で制御していください。
+
+
+
+
+Audio in/out config
+audio input: mic
+host name or ip:
+port: 
+tcp
+channels: 1
+input delay: 0
+async: check
+
+input player: check
+player device:
+player delay: 40ms
+
+

@@ -1,0 +1,99 @@
+# Configuration file for
+# signal processing parameters
+
+# power threshold (in dB) for formant extraction 
+# should be adjusted according to mic gain and level
+# -10000  ->  adaptive power threshold (using first intervals: 0.3 to 1 seconds), 
+#         but preferable to adjust fixed values for fixed environments
+# default = 0 dB
+[power threshold]
+30
+40
+25
+5
+25
+35
+30
+-10000
+
+
+# f0 method
+# 0 -> ACF of LPC residual signal
+# 1 -> ACF of low frequency region (F1 band)
+# 3 -> ACF of mid frequency region (F3 band)
+# 6 -> SACF
+[f0 estimation]
+1
+0
+6
+
+# option for doing (1) or not (0) a double pre-emphasis in the input signal:
+# recommended for whispery/breathy voices
+[double pre-emphasis]
+1
+0
+
+# -1 -> default = 19 coefficients
+[lpc dimension]
+-1
+13
+15
+
+# VAD parameters
+# minimum utterance duration (ms)
+[min utterance dur]
+70
+
+# pre-roll (ms)
+[pre roll]
+200
+100
+200
+20
+
+# after-roll (ms)
+[after roll]
+200
+100
+20
+200
+
+# minimum pause duration between two utterances (ms)
+[pause dur]
+400
+200
+
+# voicing probability threshold for VAD (0 to 1)
+[voicing threshold]
+0.4
+0.3
+0.5
+0
+
+
+# estimate vocal fry when doing best path
+[estimate vocal fry]
+1
+0
+
+# estimate speech rate when doing best path
+[estimate speech rate]
+1
+0
+
+# estimate last syllable segment within an specific utterance segment
+[estimate last syll]
+1
+
+# calculate sub-bands when loading parameters (necessary for fry detection)
+# 0 -> save time when loading parameters
+[calc sub-bands]
+1
+
+# parameter save format
+# 0 -> binary
+# 1 -> asc
+#[parameter format]
+#1
+
+

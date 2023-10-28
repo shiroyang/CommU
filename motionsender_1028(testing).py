@@ -132,19 +132,20 @@ def log(func):
 
 @log
 def play_tone():
-    global system_lag_duration
-    global play_obj
-    ################ Time Measuring Start ################ 
-    # Stop the previous sound if it is playing
-    if play_obj is not None and play_obj.is_playing(): play_obj.stop()  
-    play_obj = sa.play_buffer(pcm_wave, 1, 2, BEEP_SAMPLE_RATE)  
+	global system_lag_duration
+	global play_obj
+	play_tone_start = time.time()
+	################ Time Measuring Start ################ 
+	# Stop the previous sound if it is playing
+	if play_obj is not None and play_obj.is_playing(): play_obj.stop()  
+	play_obj = sa.play_buffer(pcm_wave, 1, 2, BEEP_SAMPLE_RATE)  
 
-    time_elapsed = time.time() - play_tone_start 
-    # Calculate any discrepancy from the desired play duration
-    discrepancy = BEEP_DURATION - time_elapsed
-    # If the sound played for less time, we wait for the remaining duration to ensure the sound plays for the full duration.
-    if discrepancy > 0: time.sleep(discrepancy)
-    ################ Time Measuring End   ################
+	time_elapsed = time.time() - play_tone_start 
+	# Calculate any discrepancy from the desired play duration
+	discrepancy = BEEP_DURATION - time_elapsed
+	# If the sound played for less time, we wait for the remaining duration to ensure the sound plays for the full duration.
+	if discrepancy > 0: time.sleep(discrepancy)
+	################ Time Measuring End   ################
 
 def show_images(cue_path1, cue_path2):
 	global ExpNum

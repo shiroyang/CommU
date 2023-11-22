@@ -70,8 +70,6 @@ beep_on_lock = Lock()
 change_img = False
 change_img_lock = Lock() 
 
-log_lock = Lock()
-
 idx = 0
 idx_lock = Lock()
 
@@ -147,9 +145,8 @@ def log(func):
         log_path = "C:/Users/kumadalab/Desktop/COMMU/carlos/log_data/log_{}.txt".format(p_time)
 
         try:
-            with log_lock:
-                with open(log_path, 'a') as f:
-                    f.write("{}   {}\n".format(datetime.datetime.now(),func.__name__))
+            with open(log_path, 'a') as f:
+                f.write("{}   {}\n".format(datetime.datetime.now(),func.__name__))
         except Exception as e:
             print(f"Failed to log information: {e}")
 

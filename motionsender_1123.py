@@ -215,11 +215,11 @@ def show_images(cue_path1, cue_path2):
                 else:
                     cv2.destroyAllWindows()
 
-                with change_img_lock:
-                    if change_img == True:
-                        print("Changing img")
+                if change_img == True:
+                    print("Changing img")
+                    with change_img_lock:
                         change_img = False
-                        break
+                    break
 
         else:
 
@@ -260,7 +260,7 @@ def supervised_sleep(duration, function):
 
 
 def key_func():
-    global is_space_pressed, is_q_pressed, idx, ExpNum, myrecording, beep_on, p_time, trl_st, trl_dur
+    global is_space_pressed, is_q_pressed, idx, ExpNum, myrecording, beep_on, p_time, trl_st, trl_dur, change_img
     # quit the program
     if keyboard.is_pressed('esc'):
         init_pos()
@@ -270,13 +270,13 @@ def key_func():
     elif keyboard.is_pressed("space") and ExpNum[1, idx] == 0:
         if not is_space_pressed:
             if beep_on:
+                with is_space_pressed_lock:
+                    is_space_pressed = True
 
                 with open(log_path, 'a') as f:
                     f.write(
                         "{}   is_space_pressed = True\n".format(
                             datetime.datetime.now()))
-                with is_space_pressed_lock:
-                    is_space_pressed = True
                 trl_dur = time.time() - trl_st
                 with open("C:/Users/kumadalab/Desktop/COMMU/carlos/button_data/dur_{}.txt".format(p_time), "a") as f:
                     f.write(str(trl_dur) + ",{}".format(ExpNum[0, idx]) + "\n")
@@ -303,12 +303,12 @@ def key_func():
     elif keyboard.is_pressed('q') and ExpNum[1, idx] == 1:
         if not is_q_pressed:
             if beep_on:
+                with is_q_pressed_lock:
+                    is_q_pressed = True
                 with open(log_path, 'a') as f:
                     f.write(
                         "{}   is_q_pressed = True\n".format(
                             datetime.datetime.now()))
-                with is_q_pressed_lock:
-                    is_q_pressed = True
                 print('Q detected')
 
                 with change_img_lock:
@@ -511,7 +511,8 @@ def condition1():
     global myrecording
     global beep_on
 
-    beep_on = False
+    with beep_on_lock:
+        beep_on = False
     condition = [False] * 4
     condition[1] = True
     print("Condition1")

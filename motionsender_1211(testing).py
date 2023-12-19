@@ -1,9 +1,9 @@
 """
 20231123
 Bug Fix of race condition by adding lock.
-Removed supervised_sleep() function and replaced it with keyboard_listener() function.
 Using a shared file for threads communication is risky so replace it with thread-safe lock.
 
+1123 -> 1211: RTが最短でも0.7sec問題: Buffer 0.5sec + beep 0.2 sec
 1028 -> 1123: 各関数にlockを追加し、race conditionを解消、またインデントを統一した
 1020 -> 1028: beep音RTのbug fix
 1018 -> 1020: beep音のライブラリーをpydubからsimpleaudioに変更し、システムラグを200msから5msに短縮
@@ -69,10 +69,7 @@ beep_on = False
 beep_on_lock = Lock()
 
 change_img = False
-change_img_lock = Lock() 
-
-idx = 0
-idx_lock = Lock()
+change_img_lock = Lock()
 
 # button press time recording
 trl_dur = None
@@ -90,7 +87,7 @@ for i in range(18):
 random.shuffle(ExpNum)
 ExpNum = np.array(ExpNum).transpose()
 print(ExpNum)
-
+idx = 0
 
 # save data
 now = datetime.datetime.now()
@@ -143,11 +140,15 @@ d = {
 
 def log(func):
     def wrapper(*args, **kwargs):
-        log_path = "C:/Users/kumadalab/Desktop/COMMU/carlos/log_data/log_{}.txt".format(p_time)
+        log_path = "C:/Users/kumadalab/Desktop/COMMU/carlos/log_data/log_{}.txt".format(
+            p_time)
 
         try:
             with open(log_path, 'a') as f:
-                f.write("{}   {}\n".format(datetime.datetime.now(),func.__name__))
+                f.write(
+                    "{}   {}\n".format(
+                        datetime.datetime.now(),
+                        func.__name__))
         except Exception as e:
             print(f"Failed to log information: {e}")
 
@@ -157,22 +158,20 @@ def log(func):
 
 @log
 def play_tone():
-    global system_lag_duration
     global play_obj
+    global beep_on_lock
     play_tone_start = time.time()
     ################ Time Measuring Start ################
     # Stop the previous sound if it is playing
     if play_obj is not None and play_obj.is_playing():
         play_obj.stop()
+
     play_obj = sa.play_buffer(pcm_wave, 1, 2, BEEP_SAMPLE_RATE)
 
     time_elapsed = time.time() - play_tone_start
+    print(time_elapsed)
     # Calculate any discrepancy from the desired play duration
-    discrepancy = BEEP_DURATION - time_elapsed
-    # If the sound played for less time, we wait for the remaining duration to
-    # ensure the sound plays for the full duration.
-    if discrepancy > 0:
-        time.sleep(discrepancy)
+
     ################ Time Measuring End   ################
 
 
@@ -211,15 +210,15 @@ def show_images(cue_path1, cue_path2):
                 if time.time() - st_time < IMG_DURATION:
 
                     cv2.imshow("Images on Second Monitor", cv_cue1_resized)
-                    key = cv2.waitKey(1)
+                    key = cv2.waitKey(10)
                 else:
                     cv2.destroyAllWindows()
 
-                with change_img_lock:
-                    if change_img == True:
-                        print("Changing img")
+                if change_img == True:
+                    print("Changing img")
+                    with change_img_lock:
                         change_img = False
-                        break
+                    break
 
         else:
 
@@ -237,7 +236,7 @@ def show_images(cue_path1, cue_path2):
                 if time.time() - st_time <= IMG_DURATION:
 
                     cv2.imshow("Images on Second Monitor", cv_img_resized)
-                    key = cv2.waitKey(1)
+                    key = cv2.waitKey(10)
                 else:
                     cv2.destroyAllWindows()
 
@@ -247,87 +246,49 @@ def show_images(cue_path1, cue_path2):
                         change_img = False
                         break
 
-
     cv2.destroyAllWindows()
 
 
-# def supervised_sleep(duration, function):
-#     num = int(duration * 100)
-#     for _ in range(num):
-#         flag = function()
-#         sleep(0.009)
-#         if flag:
-#             return True
+def supervised_sleep(duration, function):
+    num = int(duration * 100)
+    for _ in range(num):
+        flag = function()
+        sleep(0.009)
+        if flag:
+            return True
 
-def keyboard_listener():
-    global is_space_pressed, is_q_pressed, flag_quit, change_img, trl_st, trl_dur, p_time, idx, ExpNum, beep_on, myrecording
-    while True:
-        if keyboard.is_pressed('esc'):
-            init_pos()
-            print("Terminating CommU")
-            os._exit(-1)
-            
-        if keyboard.is_pressed("space") and ExpNum[1, idx] == 0:
+
+def key_func():
+    global is_space_pressed, is_q_pressed, idx, ExpNum, myrecording, beep_on, p_time, trl_st, trl_dur, change_img
+    # quit the program
+    if keyboard.is_pressed('esc'):
+        init_pos()
+        print("Terminating CommU")
+        os._exit(-1)
+    # trigger the keyboard function
+    elif keyboard.is_pressed("space") and ExpNum[1, idx] == 0:
+        if not is_space_pressed:
             if beep_on:
-                with open(log_path, 'a') as f:
-                    f.write("{}   is_space_pressed = True\n".format(datetime.datetime.now()))
-                    
                 with is_space_pressed_lock:
                     is_space_pressed = True
-                
                 trl_dur = time.time() - trl_st
                 with open("C:/Users/kumadalab/Desktop/COMMU/carlos/button_data/dur_{}.txt".format(p_time), "a") as f:
                     f.write(str(trl_dur) + ",{}".format(ExpNum[0, idx]) + "\n")
+                with open(log_path, 'a') as f:
+                    f.write(
+                        "{}   is_space_pressed = True\n".format(
+                            datetime.datetime.now()))
                 print("Space detected")
-                
                 with change_img_lock:
                     change_img = True
 
                 look_at_you()
-                sleep(3)
+                supervised_sleep(3, key_func)
                 init_pos()
                 with beep_on_lock:
                     beep_on = False
                 with is_space_pressed_lock:
                     is_space_pressed = False
-                    
-                if idx < 17:
-                    idx += 1
-                    eval("condition{}()".format(ExpNum[0, idx] % 3 + 1))
-                    return True
-                else:
-                    init_pos()
-                    print("finishing the experiment")
-                    os._exit(-1)   
-                
-                
-        if keyboard.is_pressed('q') and ExpNum[1, idx] == 1:
-            if beep_on:
-                with open(log_path, 'a') as f:
-                    f.write("{}   is_q_pressed = True\n".format(datetime.datetime.now()))
-
-                with is_q_pressed_lock:
-                    is_q_pressed = True
-                
-                print('Q detected')
-                
-                with change_img_lock:
-                    change_img = True
-                
-                look_at_you()
-                sleep(3)
-                init_pos()
-                
-                sd.stop()
-                print("Recording stopped")
-                write('C:/Users/kumadalab/Desktop/COMMU/carlos/sound_data/output_{}_{}_{}.wav'.format(p_time, ExpNum[0, idx], idx), fs, myrecording)
-                
-                with beep_on_lock:
-                    beep_on = False
-                
-                with is_q_pressed_lock:
-                    is_q_pressed = False
-                
                 if idx < 17:
                     idx += 1
                     eval("condition{}()".format(ExpNum[0, idx] % 3 + 1))
@@ -336,9 +297,42 @@ def keyboard_listener():
                     init_pos()
                     print("finishing the experiment")
                     os._exit(-1)
-                
-        
-        time.sleep(0.01)  # Short sleep to prevent high CPU usage
+
+    elif keyboard.is_pressed('q') and ExpNum[1, idx] == 1:
+        if not is_q_pressed:
+            if beep_on:
+                with is_q_pressed_lock:
+                    is_q_pressed = True
+                with open(log_path, 'a') as f:
+                    f.write(
+                        "{}   is_q_pressed = True\n".format(
+                            datetime.datetime.now()))
+                print('Q detected')
+
+                with change_img_lock:
+                    change_img = True
+
+                look_at_you()
+                supervised_sleep(3, key_func)
+                init_pos()
+
+                sd.stop()
+                print("Recording stopped")
+                write('C:/Users/kumadalab/Desktop/COMMU/carlos/sound_data/output_{}_{}_{}.wav'.format(
+                    p_time, ExpNum[0, idx], idx), fs, myrecording)
+
+                with beep_on_lock:
+                    beep_on = False
+                with is_q_pressed_lock:
+                    is_q_pressed = False
+                if idx < 17:
+                    idx += 1
+                    eval("condition{}()".format(ExpNum[0, idx] % 3 + 1))
+                    return True
+                else:
+                    init_pos()
+                    print("finishing the experiment")
+                    os._exit(-1)
 
 
 def send(data):
@@ -415,7 +409,7 @@ def move(joint_name, val, sleep_time=.1, velocity=1000):
     command = '/movemulti5 {} {} {} {} {} \n'.format(
         d[joint_name], val, velocity, priority, keeptime * 1000)
     send(command)
-    sleep(sleep_time)
+    supervised_sleep(sleep_time, key_func)
 
 
 def move5(joint_name, val, duration=1, priority=4, keeptime=300, sleep_time=1):
@@ -438,7 +432,7 @@ def init_pos():
         else:
             move5(key, 0, sleep_time=.01)
 
-    sleep(1)
+    supervised_sleep(1, key_func)
 
     with change_img_lock:
         change_img = False
@@ -464,7 +458,7 @@ def reading(duration=3):
     move("head_yaw", 0, .1)
     move("eye_pitch", -3, .1)
     move("head_roll", 0, .1)
-    sleep(.1)
+    supervised_sleep(.1, key_func)
 
     st = time.time()
     while True:
@@ -473,11 +467,11 @@ def reading(duration=3):
 
         move("right_eye", -40, .01, velocity=600)
         move("left_eye", -50, .01, velocity=600)
-        sleep(.5)
+        supervised_sleep(.5, key_func)
 
         move("right_eye", 70, .01, velocity=900)
         move("left_eye", 60, .01, velocity=900)
-        sleep(.8)
+        supervised_sleep(.8, key_func)
 
 
 # condition1
@@ -541,29 +535,34 @@ def condition1():
         move("head_roll", 0, .1)
         move("waist_yaw", 0, .1)
         reading(3)
-        with beep_on_lock:
-            if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
-                trl_st = time.time()
-                play_tone()
+        if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
+            trl_st = time.time()
+            # スペースキーの受付を可にする
+            with beep_on_lock: 
                 beep_on = True
+            play_tone()
 
         # st = time()
         for j in range(3):
             exploring_left()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
-                    beep_on = True
-            sleep(3)
+            if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
+                    beep_on = True                
+                play_tone()
+
+            supervised_sleep(3, key_func)
 
             exploring_right()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
+            if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
                     beep_on = True
-            sleep(3)
+                play_tone()
+
+            supervised_sleep(3, key_func)
 
             # cur = time()-st
             # with open("C:/Users/kumadalab/Desktop/COMMU/Shiro/duration_cond1.txt", "a") as f:
@@ -627,29 +626,35 @@ def condition2():
         move("head_roll", 0, .1)
         move("waist_yaw", 0, .1)
         reading(3)
-        with beep_on_lock:
-            if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
-                trl_st = time.time()
-                play_tone()
+        if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
+            trl_st = time.time()
+            # スペースキーの受付を可にする
+            with beep_on_lock: 
                 beep_on = True
+            play_tone()
+
 
         # st = time()
         for j in range(3):
             communicative_left()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
+            if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
                     beep_on = True
-            sleep(3.445)
+                play_tone()
+
+            supervised_sleep(3.445, key_func)
 
             communicative_right()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
+            if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
                     beep_on = True
-            sleep(3.445)
+                play_tone()
+
+            supervised_sleep(3.445, key_func)
 
     # cur = time()-st
     # with open("C:/Users/kumadalab/Desktop/COMMU/Shiro/duration_cond2.txt", "a") as f:
@@ -690,6 +695,7 @@ def condition3():
     global trl_st
     global myrecording
     global beep_on
+    # print("cond3: beep_on = False, 479")
     with beep_on_lock:
         beep_on = False
     condition = [False] * 4
@@ -714,29 +720,35 @@ def condition3():
         move("eye_pitch", -3, .1)
         move("head_roll", 0, .1)
         reading(3)
-        with beep_on_lock:
-            if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
-                trl_st = time.time()
-                play_tone()
+        if ExpNum[0, idx] // 3 == 2 and beep_on == False and i == 1:
+            trl_st = time.time()
+            # スペースキーの受付を可にする
+            with beep_on_lock: 
                 beep_on = True
+            play_tone()
+
         # st = time()
 
         for j in range(6):
             working_left()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
+            if ExpNum[0, idx] // 3 == 0 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
                     beep_on = True
-            sleep(0.5)
+                play_tone()
+
+            supervised_sleep(0.5, key_func)
 
             working_right()
-            with beep_on_lock:
-                if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
-                    trl_st = time.time()
-                    play_tone()
+            if ExpNum[0, idx] // 3 == 1 and beep_on == False and i == 1:
+                trl_st = time.time()
+                # スペースキーの受付を可にする
+                with beep_on_lock: 
                     beep_on = True
-            sleep(0.5)
+                play_tone()
+
+            supervised_sleep(0.5, key_func)
 
         # cur = time()-st
         # with open("C:/Users/kumadalab/Desktop/COMMU/Shiro/duration_cond3.txt", "a") as f:
@@ -751,9 +763,6 @@ if __name__ == '__main__':
 
     t2 = threading.Thread(target=show_images, args=(cue_path1, cue_path2))
     t2.start()
-    
-    t3 = threading.Thread(target=keyboard_listener)
-    t3.start()
 
     time.sleep(2)
     print('send motion commands')
@@ -774,4 +783,3 @@ if __name__ == '__main__':
 
     t1.join()
     t2.join()
-    t3.join()
